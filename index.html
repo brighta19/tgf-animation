@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>TGF</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #cvs {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        img {
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="cvs"></canvas>
+    <img src="banner.png" />
+    <script>
+
+        // Get reference to canvas and its drawing tools
+        var cvs = document.querySelector("#cvs");
+        var ctx = cvs.getContext("2d");
+
+        // Image sources
+        var BANNER_IMG      = "banner.png";
+        var INDIVIDUAL_IMG  = "avatar_individual.png";
+        var FAMILY_IMG      = "avatar_family.png";
+        var COMMUNITY_IMG   = "avatar_community.png";
+        var WORLD_IMG       = "avatar_world.png";
+
+        // Image size
+        var IMG_SIZE = 170;
+
+        // Images that will be used
+        var imagesToLoad = [BANNER_IMG, INDIVIDUAL_IMG, FAMILY_IMG, COMMUNITY_IMG, WORLD_IMG];
+        var imagesLoaded = {};
+
+        // Counter that goes from 0 to 100
+        var counter = 0;
+        // Increments counter
+        var speed = 3;
+
+        // Updates per second
+        var ups = 20;
+
+        // Time to use as 'past' date (in ms)
+        var previousDate = Date.now();
+
+
+        // Resize the canvas to the screen
+        function resizeCanvasToScreen() {
+            cvs.width = window.innerWidth;
+            cvs.height = window.innerHeight;
+        }
+
+        // Update to the canvas
+        function update() {
+            // The time now (in ms)
+            var currentDate = Date.now();
+
+            // The coordinates for the center of the screen
+            var center = {
+                x: cvs.width / 2,
+                y: cvs.height / 2,
+            }
+
+            // Increment counter based on time
+            counter += (speed / 500) * (currentDate - previousDate);
+            // Limit counter
+            if (counter > 100)
+                counter -= 100;
+
+            var pos = (counter / 100) * 600; // Relative position to use
+            var rot = (counter / 100) * 360; // Rotation to use
+
+            // Clear the screen
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+            // Draw a number ofz avatars based on canvas size
+            for (var x = -1; x < Math.ceil(cvs.width / 600); x++) {
+                for (var y = -1; y < Math.ceil(cvs.height / 150); y++) {
+                    // Draw rotated individual
+                    ctx.save();
+                    ctx.translate(IMG_SIZE / 2 + (pos + x * 600), IMG_SIZE / 2 + (y * 150));
+                    ctx.rotate( rot / 180 * Math.PI );
+                    ctx.drawImage(imagesLoaded[INDIVIDUAL_IMG], -IMG_SIZE / 2, -IMG_SIZE / 2);
+                    ctx.restore();
+
+                    // Draw others
+                    ctx.drawImage(imagesLoaded[FAMILY_IMG],     pos + x * 600 + 150, y * 150);
+                    ctx.drawImage(imagesLoaded[COMMUNITY_IMG],  pos + x * 600 + 300, y * 150);
+                    ctx.drawImage(imagesLoaded[WORLD_IMG],      pos + x * 600 + 450, y * 150);
+
+                }
+            }
+
+            // // Draw the BANNER_IMG image at the center of the screen
+            // ctx.drawImage(imagesLoaded[BANNER_IMG],
+            //     center.x - imagesLoaded[BANNER_IMG].width / 2,
+            //     center.y - imagesLoaded[BANNER_IMG].height / 2);
+
+
+            // Update the 'past' date
+            previousDate = currentDate;
+        }
+
+        // Load the images, executing the callback function after
+        function loadImages(images, callback) {
+            var numOfImages = images.length;
+            var numOfImagesLoaded = 0;
+
+            // Loaded images
+            var loaded = {};
+            
+            // Loop through each image to load
+            for (var i = 0; i < numOfImages; i++) {
+                // Create a new Image
+                var image = new Image();
+
+                // Set the source of the image
+                image.src = images[i];
+
+                // Set its name to its source to use later
+                image.name = images[i];
+
+                // When the image is loaded ...
+                image.onload = function () {
+                    // Place this in the loaded object, using its name as its property name
+                    loaded[this.name] = this;
+
+                    // Increase the number of images loaded
+                    numOfImagesLoaded++;
+
+                    // If it was the last images to load, execute the callback function
+                    if (numOfImagesLoaded == numOfImages) {
+                        callback(loaded);
+                    }
+                }
+            }
+        }
+
+
+        // Load the images
+        loadImages(imagesToLoad, function (images) {
+            // Set the images in a global variable
+            imagesLoaded = images;
+
+            // Call 'update' every (1000 / ups) milliseconds
+            window.setInterval(update, 1000 / ups);
+        });
+
+        // Resize the canvas to the screen
+        window.onresize = resizeCanvasToScreen;
+
+        // First set the canvas size to the screeen
+        resizeCanvasToScreen();
+        
+    </script>
+</body>
+</html>
