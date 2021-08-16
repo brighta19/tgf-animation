@@ -28,19 +28,18 @@
 </head>
 <body>
     <canvas id="cvs"></canvas>
-    <img src="banner.png" />
+    <img src="img/banner.png" />
     <script>
-
         // Get reference to canvas and its drawing tools
         var cvs = document.querySelector("#cvs");
         var ctx = cvs.getContext("2d");
 
         // Image sources
-        var BANNER_IMG      = "banner.png";
-        var INDIVIDUAL_IMG  = "avatar_individual.png";
-        var FAMILY_IMG      = "avatar_family.png";
-        var COMMUNITY_IMG   = "avatar_community.png";
-        var WORLD_IMG       = "avatar_world.png";
+        var BANNER_IMG      = "img/banner.png";
+        var INDIVIDUAL_IMG  = "img/avatar_individual.png";
+        var FAMILY_IMG      = "img/avatar_family.png";
+        var COMMUNITY_IMG   = "img/avatar_community.png";
+        var WORLD_IMG       = "img/avatar_world.png";
 
         // Image size
         var IMG_SIZE = 170;
@@ -69,6 +68,7 @@
 
         // Update to the canvas
         function update() {
+            requestAnimationFrame(update);
             // The time now (in ms)
             var currentDate = Date.now();
 
@@ -125,7 +125,7 @@
 
             // Loaded images
             var loaded = {};
-            
+
             // Loop through each image to load
             for (var i = 0; i < numOfImages; i++) {
                 // Create a new Image
@@ -160,7 +160,8 @@
             imagesLoaded = images;
 
             // Call 'update' every (1000 / ups) milliseconds
-            window.setInterval(update, 1000 / ups);
+            // window.setInterval(update, 1000 / ups);
+            update();
         });
 
         // Resize the canvas to the screen
@@ -168,7 +169,6 @@
 
         // First set the canvas size to the screeen
         resizeCanvasToScreen();
-        
     </script>
 </body>
 </html>
