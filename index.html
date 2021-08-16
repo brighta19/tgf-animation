@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- github/brighta19 -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="An animation for The Glass Files">
@@ -58,7 +59,7 @@
         const ctx = cvs.getContext("2d");
 
         const Images = {
-            INDIVIDUAL  : "img/avatar_individual.png",
+            PERSONAL  : "img/avatar_personal.png",
             FAMILY      : "img/avatar_family.png",
             COMMUNITY   : "img/avatar_community.png",
             WORLD       : "img/avatar_world.png"
@@ -67,7 +68,7 @@
         const IMG_SIZE = 170;
 
         // Images that will be used
-        let imagesToLoad = [Images.INDIVIDUAL, Images.FAMILY, Images.COMMUNITY, Images.WORLD];
+        let imagesToLoad = [Images.PERSONAL, Images.FAMILY, Images.COMMUNITY, Images.WORLD];
         let images = {};
 
         let counter = 0;
@@ -113,7 +114,7 @@
                     ctx.save();
                     ctx.translate(IMG_SIZE / 2 + (position + x * 600), IMG_SIZE / 2 + (y * 150));
                     ctx.rotate( rotation / 180 * Math.PI );
-                    ctx.drawImage(images[Images.INDIVIDUAL], -IMG_SIZE / 2, -IMG_SIZE / 2);
+                    ctx.drawImage(images[Images.PERSONAL], -IMG_SIZE / 2, -IMG_SIZE / 2);
                     ctx.restore();
 
                     // Draw others
