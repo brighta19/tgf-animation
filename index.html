@@ -30,144 +30,113 @@
     <canvas id="cvs"></canvas>
     <img src="img/banner.png" />
     <script>
-        // Get reference to canvas and its drawing tools
-        var cvs = document.querySelector("#cvs");
-        var ctx = cvs.getContext("2d");
+        const cvs = document.querySelector("#cvs");
+        const ctx = cvs.getContext("2d");
 
-        // Image sources
-        var BANNER_IMG      = "img/banner.png";
-        var INDIVIDUAL_IMG  = "img/avatar_individual.png";
-        var FAMILY_IMG      = "img/avatar_family.png";
-        var COMMUNITY_IMG   = "img/avatar_community.png";
-        var WORLD_IMG       = "img/avatar_world.png";
+        const Images = {
+            INDIVIDUAL  : "img/avatar_individual.png",
+            FAMILY      : "img/avatar_family.png",
+            COMMUNITY   : "img/avatar_community.png",
+            WORLD       : "img/avatar_world.png"
+        };
 
-        // Image size
-        var IMG_SIZE = 170;
+        const IMG_SIZE = 170;
 
         // Images that will be used
-        var imagesToLoad = [BANNER_IMG, INDIVIDUAL_IMG, FAMILY_IMG, COMMUNITY_IMG, WORLD_IMG];
-        var imagesLoaded = {};
+        let imagesToLoad = [Images.INDIVIDUAL, Images.FAMILY, Images.COMMUNITY, Images.WORLD];
+        let images = {};
 
-        // Counter that goes from 0 to 100
-        var counter = 0;
-        // Increments counter
-        var speed = 3;
+        let counter = 0;
+        let speed = 3 / 500;
 
-        // Updates per second
-        var ups = 20;
+        let previousDate = Date.now();
 
-        // Time to use as 'past' date (in ms)
-        var previousDate = Date.now();
+        let center = {
+            x: cvs.width / 2,
+            y: cvs.height / 2
+        };
 
 
-        // Resize the canvas to the screen
         function resizeCanvasToScreen() {
             cvs.width = window.innerWidth;
             cvs.height = window.innerHeight;
+
+            center.x = cvs.width / 2;
+            center.y = cvs.height / 2;
         }
 
-        // Update to the canvas
         function update() {
             requestAnimationFrame(update);
-            // The time now (in ms)
-            var currentDate = Date.now();
 
-            // The coordinates for the center of the screen
-            var center = {
-                x: cvs.width / 2,
-                y: cvs.height / 2,
+            let currentDate = Date.now();
+            let delta = currentDate - previousDate;
+
+            counter += speed * delta;
+
+            if (counter > 100) {
+                counter -= 100;
             }
 
-            // Increment counter based on time
-            counter += (speed / 500) * (currentDate - previousDate);
-            // Limit counter
-            if (counter > 100)
-                counter -= 100;
+            let position = (counter / 100) * 600;
+            let rotation = (counter / 100) * 360;
 
-            var pos = (counter / 100) * 600; // Relative position to use
-            var rot = (counter / 100) * 360; // Rotation to use
 
-            // Clear the screen
             ctx.clearRect(0, 0, cvs.width, cvs.height);
 
-            // Draw a number ofz avatars based on canvas size
             for (var x = -1; x < Math.ceil(cvs.width / 600); x++) {
                 for (var y = -1; y < Math.ceil(cvs.height / 150); y++) {
                     // Draw rotated individual
                     ctx.save();
-                    ctx.translate(IMG_SIZE / 2 + (pos + x * 600), IMG_SIZE / 2 + (y * 150));
-                    ctx.rotate( rot / 180 * Math.PI );
-                    ctx.drawImage(imagesLoaded[INDIVIDUAL_IMG], -IMG_SIZE / 2, -IMG_SIZE / 2);
+                    ctx.translate(IMG_SIZE / 2 + (position + x * 600), IMG_SIZE / 2 + (y * 150));
+                    ctx.rotate( rotation / 180 * Math.PI );
+                    ctx.drawImage(images[Images.INDIVIDUAL], -IMG_SIZE / 2, -IMG_SIZE / 2);
                     ctx.restore();
 
                     // Draw others
-                    ctx.drawImage(imagesLoaded[FAMILY_IMG],     pos + x * 600 + 150, y * 150);
-                    ctx.drawImage(imagesLoaded[COMMUNITY_IMG],  pos + x * 600 + 300, y * 150);
-                    ctx.drawImage(imagesLoaded[WORLD_IMG],      pos + x * 600 + 450, y * 150);
+                    ctx.drawImage(images[Images.FAMILY],     position + x * 600 + 150, y * 150);
+                    ctx.drawImage(images[Images.COMMUNITY],  position + x * 600 + 300, y * 150);
+                    ctx.drawImage(images[Images.WORLD],      position + x * 600 + 450, y * 150);
 
                 }
             }
 
-            // // Draw the BANNER_IMG image at the center of the screen
-            // ctx.drawImage(imagesLoaded[BANNER_IMG],
-            //     center.x - imagesLoaded[BANNER_IMG].width / 2,
-            //     center.y - imagesLoaded[BANNER_IMG].height / 2);
-
-
-            // Update the 'past' date
             previousDate = currentDate;
         }
 
-        // Load the images, executing the callback function after
-        function loadImages(images, callback) {
-            var numOfImages = images.length;
-            var numOfImagesLoaded = 0;
+        function loadImages(imageSources) {
+            return new Promise((resolve, reject) => {
+                let numOfImages = imageSources.length;
+                let numOfImagesLoaded = 0;
 
-            // Loaded images
-            var loaded = {};
+                let loaded = {};
 
-            // Loop through each image to load
-            for (var i = 0; i < numOfImages; i++) {
-                // Create a new Image
-                var image = new Image();
+                for (let i = 0; i < numOfImages; i++) {
+                    let image = new Image();
 
-                // Set the source of the image
-                image.src = images[i];
+                    image.src = imageSources[i];
+                    image.name = imageSources[i];
 
-                // Set its name to its source to use later
-                image.name = images[i];
+                    image.onload = function () {
+                        loaded[this.name] = this;
 
-                // When the image is loaded ...
-                image.onload = function () {
-                    // Place this in the loaded object, using its name as its property name
-                    loaded[this.name] = this;
+                        numOfImagesLoaded++;
 
-                    // Increase the number of images loaded
-                    numOfImagesLoaded++;
-
-                    // If it was the last images to load, execute the callback function
-                    if (numOfImagesLoaded == numOfImages) {
-                        callback(loaded);
+                        if (numOfImagesLoaded === numOfImages) {
+                            resolve(loaded);
+                        }
                     }
                 }
-            }
+            });
         }
 
+        loadImages(imagesToLoad)
+        .then(_images => {
+            images = _images;
 
-        // Load the images
-        loadImages(imagesToLoad, function (images) {
-            // Set the images in a global variable
-            imagesLoaded = images;
-
-            // Call 'update' every (1000 / ups) milliseconds
-            // window.setInterval(update, 1000 / ups);
             update();
         });
 
-        // Resize the canvas to the screen
         window.onresize = resizeCanvasToScreen;
-
-        // First set the canvas size to the screeen
         resizeCanvasToScreen();
     </script>
 </body>
